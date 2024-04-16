@@ -17,6 +17,9 @@ struct Task {
   id: Uuid,
 }
 
+// 24:35 Json<Tasks<'_>>
+// the trait bound `rocket::State<rocket::tokio::sync::Mutex<Vec<Task>>>: Serialize` is not satisfied
+// the following other types implement trait `Serialize`
 #[get("/list")]
 async fn read(list: Tasks<'_>) -> Json<Tasks<'_>> {
   Json(list)
@@ -61,9 +64,11 @@ async fn update(id: &str, task: Json<Task>, list: Tasks<'_>) -> Option<Value> {
       Ok(x) => {
         for item in list.into_iter() {
           if item.id == x {
+            // mismatched types expected struct `Task` found struct `Json<Task>`
             *item = task;
           }
         }
+        // send Some only if find such task id
         Some(json!({ "status": "ok" }))
       }
       Err(_) => None
